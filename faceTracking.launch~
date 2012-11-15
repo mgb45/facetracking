@@ -1,0 +1,21 @@
+<launch>
+<!--  <node pkg="opticalFlow" type="opticalFlow" name="flow" output="screen"> -->
+  <node pkg="opticalFlow" type="faceTrack" name="flow" output="screen">
+	<remap from="image" to="/rgb/image_color"/>
+  </node>
+
+  <node pkg="openni_camera" type="openni_node" name="kinect"/>
+
+  <node pkg="image_proc" type="image_proc" name="bayer2rgb">
+	<env name="ROS_NAMESPACE" value="/rgb"/>
+</node>
+
+  <node pkg="image_view" type="image_view" name="im_in">
+	<remap from="image" to="/rgb/image_color"/>
+  </node>
+
+  <node pkg="image_view" type="image_view" name="im_out">
+	<remap from="image" to="/outputImage"/>
+  </node>
+
+</launch>
