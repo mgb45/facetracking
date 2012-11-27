@@ -13,7 +13,8 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/image_encodings.h>
 #include "sensor_msgs/Image.h"
-
+#include "sensor_msgs/RegionOfInterest.h"
+#include "faceTracking/ROIArray.h"
 
 class face 
 {
@@ -23,6 +24,7 @@ class face
 		cv::Rect roi;
 		int views;
 		bool visible;
+		std::string id;
 		void predictPos(double dt);
 		void updatePos(float x, float y);
 	private:
@@ -48,6 +50,7 @@ class FaceTracker
 		
 		ros::NodeHandle nh;
 		double dtime;
+		ros::Publisher roi_pub;
 		image_transport::Publisher pub;
 		image_transport::Subscriber sub;
 		void imageCallback(const sensor_msgs::ImageConstPtr& msg);

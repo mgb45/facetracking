@@ -7,14 +7,20 @@
 
   <node pkg="image_proc" type="image_proc" name="bayer2rgb">
 	<env name="ROS_NAMESPACE" value="/rgb"/>
-</node>
+  </node>
 
   <node pkg="image_view" type="image_view" name="im_in">
 	<remap from="image" to="/rgb/image_color"/>
   </node>
 
+  <node pkg="image_view" type="image_view" name="im_out1">
+	<remap from="image" to="/blobImage"/>
+  </node>
+
   <node pkg="image_view" type="image_view" name="im_out">
 	<remap from="image" to="/outputImage"/>
   </node>
+
+  <node pkg="handBlobTracker" type="handTracker" name="handTracker" output="screen"/>
 
 </launch>

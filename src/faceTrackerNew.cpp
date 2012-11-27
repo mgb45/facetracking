@@ -68,9 +68,11 @@ FaceTracker::FaceTracker()
 		ROS_ERROR("--(!)Error loading\n");
 	}
 	
-	faceThresh = 3;
+	faceThresh = 10;
 	
 	dtime = ros::Time::now().toSec();
+	
+	roi_pub = nh.advertise<faceTracking::ROIArray>("faceROIs", 1000);
 }
 
 FaceTracker::~FaceTracker()
@@ -80,23 +82,45 @@ FaceTracker::~FaceTracker()
 
 void FaceTracker::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-	ROS_INFO("Image Received");  //ROS
 	namespace enc = sensor_msgs::image_encodings;
 	try
 	{	
+		time_t  start_time = clock(), end_time;
+		float time1;
 		cv::Mat image = (cv_bridge::toCvCopy(msg, enc::RGB8))->image; //ROS
 		std::vector<cv::Rect> faceROIs = findFaces(image);
-		updateFaces(faceROIs, image, msg->header.stamp.toSec()-dtime);
-		dtime = msg->header.stamp.toSec();
+		end_time = clock();
+		time1 = (float) (end_time - start_time) / CLOCKS_PER_SEC; 
+		start_time = end_time;
+		printf("time for code to find faces %f seconds\n", time1);
 		
-		for (int i = 0; i < faces.size(); i++)
+		updateFaces(faceROIs, image, msg->header.stamp.toSec()-dtime);
+		
+		
+		faceTracking::ROIArray rosFaceROIs;
+		bool faceFound = false;
+		sensor_msgs::RegionOfInterest roi;
+		for (int i = 0; i < (int)faces.size(); i++)
 		{
 			if (faces[i].views >= faceThresh)
 			{
+				faceFound = true;
+				roi.x_offset = faces[i].roi.x;
+				roi.y_offset = faces[i].roi.y;
+				roi.height = faces[i].roi.height;
+				roi.width = faces[i].roi.width;
+				roi.do_rectify = false;
+				rosFaceROIs.header = msg->header;
+				rosFaceROIs.ROIs.push_back(roi);
+				rosFaceROIs.ids.push_back(faces[i].id);
 				rectangle(image, Point(faces[i].roi.x, faces[i].roi.y), Point(faces[i].roi.x+faces[i].roi.width, faces[i].roi.y+faces[i].roi.height), Scalar(0, 0, 255), 4, 8, 0);
 			}
 		}
 				
+		if (faceFound)
+		{
+			roi_pub.publish(rosFaceROIs);
+		}
 		cv_bridge::CvImage img2;
 		img2.encoding = "rgb8";
 		img2.image = image;			
@@ -126,7 +150,6 @@ void FaceTracker::updateFaces(std::vector<cv::Rect> roi, cv::Mat input, double d
 {
 	for (int i = 0; i < (int)faces.size(); i++)
 	{
-		//ROS_INFO("Face %d: %d",i,faces[i].views);
 		faces[i].views = faces[i].views-1;
 		faces[i].visible = false;
 		
@@ -149,8 +172,10 @@ void FaceTracker::updateFaces(std::vector<cv::Rect> roi, cv::Mat input, double d
 			new_face.roi = roi[k1];
 			new_face.visible = true;
 			new_face.views = 1;
+			stringstream ss;
+			ss << roi[k1].x << roi[k1].y << ros::Time::now();
+			new_face.id = ss.str();
 			faces.push_back(new_face);
-			ROS_INFO ("New Face");
 		}
 		else // Faces already present
 		{
@@ -172,8 +197,10 @@ void FaceTracker::updateFaces(std::vector<cv::Rect> roi, cv::Mat input, double d
 				new_face.roi = roi[k1];
 				new_face.visible = true;
 				new_face.views = 1;
+				stringstream ss;
+				ss << roi[k1].x << roi[k1].y << ros::Time::now();
+				new_face.id = ss.str();
 				faces.push_back(new_face);
-				ROS_INFO ("Added Face");
 			}
 			else // Matching face - update current
 			{
@@ -181,9 +208,8 @@ void FaceTracker::updateFaces(std::vector<cv::Rect> roi, cv::Mat input, double d
 				faces[bestBin].roi.height = roi[k1].height;
 				faces[bestBin].roi.width = roi[k1].width;
 				faces[bestBin].updatePos(roi[k1].x,roi[k1].y);
-				ROS_INFO("Face %d: %d %d %d",bestBin,faces[bestBin].views, faces[bestBin].roi.x, faces[bestBin].roi.y);	
 				faces[bestBin].views = faces[bestBin].views + 2;
-				faces[bestBin].views = std::min(faces[bestBin].views,10);
+				faces[bestBin].views = std::min(faces[bestBin].views,faceThresh*2);
 				faces[bestBin].visible = true;
 			}
 		}
@@ -198,7 +224,7 @@ std::vector<cv::Rect> FaceTracker::findFaces(cv::Mat frame)
 	equalizeHist(frame_gray, frame_gray);
 
 	//-- Detect faces
-	face_cascade.detectMultiScale(frame_gray, faces, 1.3, 3, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30));
+	face_cascade.detectMultiScale(frame_gray, faces, 1.35, 3, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30));
 
 	for (int i = 0; i < faces.size(); i++)
 	{
