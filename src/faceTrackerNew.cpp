@@ -85,14 +85,14 @@ void FaceTracker::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 	namespace enc = sensor_msgs::image_encodings;
 	try
 	{	
-		time_t  start_time = clock(), end_time;
-		float time1;
 		cv::Mat image = (cv_bridge::toCvCopy(msg, enc::RGB8))->image; //ROS
 		std::vector<cv::Rect> faceROIs = findFaces(image);
-		end_time = clock();
-		time1 = (float) (end_time - start_time) / CLOCKS_PER_SEC; 
-		start_time = end_time;
-		printf("time for code to find faces %f seconds\n", time1);
+		//time_t  start_time = clock(), end_time;
+		//float time1;
+		//end_time = clock();
+		//time1 = (float) (end_time - start_time) / CLOCKS_PER_SEC; 
+		//start_time = end_time;
+		//printf("time for code to find faces %f seconds\n", time1);
 		
 		updateFaces(faceROIs, image, msg->header.stamp.toSec()-dtime);
 		
@@ -160,7 +160,7 @@ void FaceTracker::updateFaces(std::vector<cv::Rect> roi, cv::Mat input, double d
 		else
 		{
 			faces[i].predictPos(dt);
-			ROS_INFO("Face %d: %d %d %d %d %d",i,faces[i].views, faces[i].roi.x, faces[i].roi.y, faces[i].roi.width, faces[i].roi.height);	
+			//ROS_INFO("Face %d: %d %d %d %d %d",i,faces[i].views, faces[i].roi.x, faces[i].roi.y, faces[i].roi.width, faces[i].roi.height);	
 		}
 	}
 	
