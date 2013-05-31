@@ -27,6 +27,7 @@ class face
 		std::string id;
 		void predictPos(double dt);
 		void updatePos(float x, float y);
+		int im_width, im_height;
 	private:
 		cv::KalmanFilter tracker;
 };
@@ -50,6 +51,7 @@ class FaceTracker
 		
 		ros::NodeHandle nh;
 		double dtime;
+		
 		ros::Publisher roi_pub;
 		image_transport::Publisher pub;
 		image_transport::Subscriber sub;

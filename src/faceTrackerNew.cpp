@@ -31,9 +31,9 @@ void face::predictPos(double dt)
 	tracker.transitionMatrix.at<float>(1,3) = dt;
 	Mat prediction = tracker.predict();
 	roi.x = std::max((int)prediction.at<float>(0),0);
-	roi.x = std::min(roi.x,640-roi.width);
+	roi.x = std::min(roi.x,im_width-roi.width);
 	roi.y = std::max((int)prediction.at<float>(1),0);
-	roi.y = std::min(roi.y,480-roi.height);
+	roi.y = std::min(roi.y,im_height-roi.height);
 }
 
 void face::updatePos(float x, float y)
@@ -43,9 +43,9 @@ void face::updatePos(float x, float y)
 	measurement.at<float>(1) = y;
 	Mat estimated = tracker.correct(measurement);
 	roi.x = std::max((int)estimated.at<float>(0),0);
-	roi.x = std::min(roi.x,640-roi.width);
+	roi.x = std::min(roi.x,im_width-roi.width);
 	roi.y = std::max((int)estimated.at<float>(1),0);
-	roi.y = std::min(roi.y,480-roi.height);
+	roi.y = std::min(roi.y,im_height-roi.height);
 	
 }
 
@@ -202,6 +202,8 @@ void FaceTracker::updateFaces(std::vector<cv::Rect> roi, cv::Mat input, double d
 				stringstream ss;
 				ss << roi[k1].x << roi[k1].y << ros::Time::now();
 				new_face.id = ss.str();
+				new_face.im_width = input.cols;
+				new_face.im_height = input.rows;
 				faces.push_back(new_face);
 			}
 			else // Matching face - update current
