@@ -1,0 +1,19 @@
+<launch>
+  <node pkg="faceTracking" type="faceTrack" name="flow" output="screen">
+	<remap from="image" to="/camera/rgb/image_color"/>
+  </node>
+
+  <!--node pkg="openni_camera" type="openni_node" name="kinect"/ -->
+
+  <include file="$(find openni_launch)/launch/openni.launch" />
+
+
+  <!--node pkg="image_proc" type="image_proc" name="bayer2rgb">
+	<env name="ROS_NAMESPACE" value="/rgb"/>
+  </node> -->
+
+  <node pkg="image_view" type="image_view" name="im_out">
+	<remap from="image" to="/outputImage"/>
+  </node>
+
+</launch>

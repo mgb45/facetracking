@@ -61,6 +61,8 @@ FaceTracker::FaceTracker()
 	//Face detection
 	/** Global variables */
 	face_cascade_name = "/opt/ros/fuerte/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml"; 
+	//~ face_cascade_name = "/home/mgb45/mycascade.xml"; 
+	//~ face_cascade_name = "/home/mgb45/Downloads/hand.xml"; 
 	
 	//-- 1. Load the cascades
 	if (!face_cascade.load(face_cascade_name))
@@ -95,7 +97,7 @@ void FaceTracker::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 		//printf("time for code to find faces %f seconds\n", time1);
 		
 		updateFaces(faceROIs, image, msg->header.stamp.toSec()-dtime);
-		
+		dtime = msg->header.stamp.toSec();
 		
 		faceTracking::ROIArray rosFaceROIs;
 		bool faceFound = false;
@@ -225,6 +227,7 @@ std::vector<cv::Rect> FaceTracker::findFaces(cv::Mat frame)
 
 	//-- Detect faces
 	face_cascade.detectMultiScale(frame_gray, faces, 1.35, 3, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30));
+	//~ face_cascade.detectMultiScale(frame_gray, faces, 1.4, 6, 0|CV_HAAR_SCALE_IMAGE, Size(25, 25));
 
 	for (int i = 0; i < faces.size(); i++)
 	{
