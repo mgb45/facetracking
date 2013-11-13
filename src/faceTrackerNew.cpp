@@ -60,9 +60,9 @@ FaceTracker::FaceTracker()
 	
 	//Face detection
 	/** Global variables */
-	face_cascade_name = "/opt/ros/fuerte/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml"; 
-	//~ face_cascade_name = "/home/mgb45/mycascade.xml"; 
-	//~ face_cascade_name = "/home/mgb45/Downloads/hand.xml"; 
+	face_cascade_name = "/opt/ros/groovy/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml"; 
+	//face_cascade_name = "/home/mgb45/mycascade.xml"; 
+	//face_cascade_name = "/home/mgb45/Downloads/hand.xml"; 
 	
 	//-- 1. Load the cascades
 	if (!face_cascade.load(face_cascade_name))
@@ -209,8 +209,8 @@ void FaceTracker::updateFaces(std::vector<cv::Rect> roi, cv::Mat input, double d
 			else // Matching face - update current
 			{
 				//ROS_INFO("Old Face: %d %f",faces[bestBin].views,minDist);
-				faces[bestBin].roi.height = roi[k1].height;
-				faces[bestBin].roi.width = roi[k1].width;
+				faces[bestBin].roi.height = 0.8*faces[bestBin].roi.height + 0.2*roi[k1].height;
+				faces[bestBin].roi.width = 0.8*faces[bestBin].roi.width + 0.2*roi[k1].width;
 				faces[bestBin].updatePos(roi[k1].x,roi[k1].y);
 				faces[bestBin].views = faces[bestBin].views + 2;
 				faces[bestBin].views = std::min(faces[bestBin].views,faceThresh*2);
