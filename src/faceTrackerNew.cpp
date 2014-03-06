@@ -74,7 +74,7 @@ FaceTracker::FaceTracker()
 	
 	dtime = ros::Time::now().toSec();
 	
-	roi_pub = nh.advertise<faceTracking::ROIArray>("faceROIs", 1000);
+	roi_pub = nh.advertise<faceTracking::ROIArray>("faceROIs", 10);
 }
 
 FaceTracker::~FaceTracker()
@@ -100,30 +100,26 @@ void FaceTracker::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 		dtime = msg->header.stamp.toSec();
 		
 		faceTracking::ROIArray rosFaceROIs;
-		bool faceFound = false;
+		rosFaceROIs.header = msg->header;
 		sensor_msgs::RegionOfInterest roi;
 		for (int i = 0; i < (int)faces.size(); i++)
 		{
 			if (faces[i].views >= faceThresh)
 			{
-				faceFound = true;
 				roi.x_offset = faces[i].roi.x;
 				roi.y_offset = faces[i].roi.y;
 				roi.height = faces[i].roi.height;
 				roi.width = faces[i].roi.width;
 				roi.do_rectify = false;
-				rosFaceROIs.header = msg->header;
 				rosFaceROIs.ROIs.push_back(roi);
 				rosFaceROIs.ids.push_back(faces[i].id);
 				rectangle(image, Point(faces[i].roi.x, faces[i].roi.y), Point(faces[i].roi.x+faces[i].roi.width, faces[i].roi.y+faces[i].roi.height), Scalar(0, 0, 255), 4, 8, 0);
 			}
 		}
 				
-		if (faceFound)
-		{
-			roi_pub.publish(rosFaceROIs);
-		}
+		roi_pub.publish(rosFaceROIs);
 		cv_bridge::CvImage img2;
+		
 		img2.encoding = "rgb8";
 		img2.image = image;			
 		pub.publish(img2.toImageMsg());
@@ -228,10 +224,10 @@ std::vector<cv::Rect> FaceTracker::findFaces(cv::Mat frame)
 	equalizeHist(frame_gray, frame_gray);
 
 	//-- Detect faces
-	face_cascade.detectMultiScale(frame_gray, faces, 1.35, 3, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30));
+	face_cascade.detectMultiScale(frame_gray, faces, 1.6, 3, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, Size(30, 30));
 	//~ face_cascade.detectMultiScale(frame_gray, faces, 1.4, 6, 0|CV_HAAR_SCALE_IMAGE, Size(25, 25));
 
-	for (int i = 0; i < faces.size(); i++)
+	for (int i = 0; i < (int)faces.size(); i++)
 	{
 		//faceROIs.push_back(frame1(faces[i]));
 		Point center(faces[i].x + faces[i].width*0.5, faces[i].y + faces[i].height*0.5);
