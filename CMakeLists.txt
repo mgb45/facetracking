@@ -27,4 +27,5 @@ rosbuild_genmsg()
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 rosbuild_add_executable(faceTrack src/faceTracking.cpp src/faceTrackerNew.cpp)
+
 #target_link_libraries(example ${PROJECT_NAME})
