@@ -13,9 +13,9 @@ face::face(cv::Rect roi_in, double dt)
 	tracker.statePre.at<float>(3) = 0;
 	
 	setIdentity(tracker.measurementMatrix);
-	setIdentity(tracker.processNoiseCov, Scalar::all(80));
-	tracker.processNoiseCov.at<float>(0,0) = 0;
-	tracker.processNoiseCov.at<float>(1,1) = 0;
+	setIdentity(tracker.processNoiseCov, Scalar::all(120));
+	//tracker.processNoiseCov.at<float>(0,0) = 0;
+	//tracker.processNoiseCov.at<float>(1,1) = 0;
 	setIdentity(tracker.measurementNoiseCov, Scalar::all(5));
 	setIdentity(tracker.errorCovPost, Scalar::all(2));
 }
@@ -42,6 +42,7 @@ void face::updatePos(float x, float y)
 	measurement.at<float>(0) = x;
 	measurement.at<float>(1) = y;
 	Mat estimated = tracker.correct(measurement);
+	//ROS_INFO("Corrected %f %f",estimated.at<float>(0),estimated.at<float>(1));	
 	roi.x = std::max((int)estimated.at<float>(0),0);
 	roi.x = std::min(roi.x,im_width-roi.width);
 	roi.y = std::max((int)estimated.at<float>(1),0);
@@ -70,7 +71,7 @@ FaceTracker::FaceTracker()
 		ROS_ERROR("--(!)Error loading\n");
 	}
 	
-	faceThresh = 10;
+	faceThresh = 5;
 	
 	dtime = ros::Time::now().toSec();
 	
@@ -158,7 +159,7 @@ void FaceTracker::updateFaces(std::vector<cv::Rect> roi, cv::Mat input, double d
 		else
 		{
 			faces[i].predictPos(dt);
-			//ROS_INFO("Face %d: %d %d %d %d %d",i,faces[i].views, faces[i].roi.x, faces[i].roi.y, faces[i].roi.width, faces[i].roi.height);	
+			//ROS_INFO("Predicted %d: %d %d %d %d %d",i,faces[i].views, faces[i].roi.x, faces[i].roi.y, faces[i].roi.width, faces[i].roi.height);	
 		}
 	}
 	
@@ -205,6 +206,7 @@ void FaceTracker::updateFaces(std::vector<cv::Rect> roi, cv::Mat input, double d
 			else // Matching face - update current
 			{
 				//ROS_INFO("Old Face: %d %f",faces[bestBin].views,minDist);
+				//ROS_INFO("Measured %d %d %d %d",roi[k1].x, roi[k1].y, roi[k1].width, roi[k1].height);	
 				faces[bestBin].roi.height = 0.8*faces[bestBin].roi.height + 0.2*roi[k1].height;
 				faces[bestBin].roi.width = 0.8*faces[bestBin].roi.width + 0.2*roi[k1].width;
 				faces[bestBin].updatePos(roi[k1].x,roi[k1].y);
