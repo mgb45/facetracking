@@ -55,9 +55,9 @@ FaceTracker::FaceTracker()
 	
 	image_transport::ImageTransport it(nh); //ROS
 	
-	pub = it.advertise("/outputImage",1); //ROS
+	pub = it.advertise("/outputImage",10); //ROS
  	
-	sub = it.subscribe("/image", 1, &FaceTracker::imageCallback,this); //ROS
+	sub = it.subscribe("/image", 5, &FaceTracker::imageCallback,this); //ROS
 	
 	//Face detection
 	/** Global variables */
@@ -71,7 +71,7 @@ FaceTracker::FaceTracker()
 		ROS_ERROR("--(!)Error loading\n");
 	}
 	
-	faceThresh = 5;
+	faceThresh = 15;
 	
 	dtime = ros::Time::now().toSec();
 	
@@ -105,7 +105,7 @@ void FaceTracker::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 		sensor_msgs::RegionOfInterest roi;
 		for (int i = 0; i < (int)faces.size(); i++)
 		{
-			if (faces[i].views >= faceThresh)
+			if (faces[i].views > 0)
 			{
 				roi.x_offset = faces[i].roi.x;
 				roi.y_offset = faces[i].roi.y;
