@@ -71,7 +71,7 @@ FaceTracker::FaceTracker()
 		ROS_ERROR("--(!)Error loading\n");
 	}
 	
-	faceThresh = 8;
+	faceThresh = 25;
 	
 	dtime = ros::Time::now().toSec();
 	
@@ -226,7 +226,7 @@ std::vector<cv::Rect> FaceTracker::findFaces(cv::Mat frame)
 	equalizeHist(frame_gray, frame_gray);
 
 	//-- Detect faces
-	face_cascade.detectMultiScale(frame_gray, faces, 1.1, 6, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, Size(5, 5),Size(80, 80));
+	face_cascade.detectMultiScale(frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, Size(5, 5),Size(120, 120));
 	//~ face_cascade.detectMultiScale(frame_gray, faces, 1.4, 6, 0|CV_HAAR_SCALE_IMAGE, Size(25, 25));
 
 	for (int i = 0; i < (int)faces.size(); i++)
