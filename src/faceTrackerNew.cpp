@@ -6,7 +6,8 @@ using namespace std;
 face::face(cv::Rect roi_in, double dt)
 {
 	tracker.init(4,2,0,CV_32F);
-	tracker.transitionMatrix = *(Mat_<float> (4, 4) << 1, 0, dt, 0, 0, 1, 0, dt, 0, 0, 1, 0, 0, 0, 0, 1);
+	float dummy_query_data[16] = {1, 0, dt, 0, 0, 1, 0, dt, 0, 0, 1, 0, 0, 0, 0, 1};
+	tracker.transitionMatrix = cv::Mat(4,4,CV_32F,dummy_query_data);
 	tracker.statePre.at<float>(0) = roi_in.x;
 	tracker.statePre.at<float>(1) = roi_in.y;
 	tracker.statePre.at<float>(2) = 0;
@@ -75,7 +76,7 @@ FaceTracker::FaceTracker()
 	
 	dtime = ros::Time::now().toSec();
 	
-	roi_pub = nh.advertise<faceTracking::ROIArray>("faceROIs", 10);
+	roi_pub = nh.advertise<facetracking::ROIArray>("faceROIs", 10);
 }
 
 FaceTracker::~FaceTracker()
@@ -100,7 +101,7 @@ void FaceTracker::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 		updateFaces(faceROIs, image, msg->header.stamp.toSec()-dtime);
 		dtime = msg->header.stamp.toSec();
 		
-		faceTracking::ROIArray rosFaceROIs;
+		facetracking::ROIArray rosFaceROIs;
 		rosFaceROIs.header = msg->header;
 		sensor_msgs::RegionOfInterest roi;
 		for (int i = 0; i < (int)faces.size(); i++)

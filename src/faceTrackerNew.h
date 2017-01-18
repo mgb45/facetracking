@@ -14,7 +14,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include "sensor_msgs/Image.h"
 #include "sensor_msgs/RegionOfInterest.h"
-#include "faceTracking/ROIArray.h"
+#include "facetracking/ROIArray.h"
 
 class face 
 {

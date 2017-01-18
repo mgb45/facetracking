@@ -17,7 +17,7 @@ face::face(cv::Rect roi_in, double dt)
 	//tracker.processNoiseCov.at<float>(0,0) = 0;
 	//tracker.processNoiseCov.at<float>(1,1) = 0;
 	setIdentity(tracker.measurementNoiseCov, Scalar::all(5));
-	setIdentity(tracker.errorCovPost, Scalar::all(2));
+	setIdentity(tracker.errorCovPost, Scalar::all(2000000));
 }
 
 face::~face()
@@ -71,7 +71,7 @@ FaceTracker::FaceTracker()
 		ROS_ERROR("--(!)Error loading\n");
 	}
 	
-	faceThresh = 8;
+	faceThresh = 2;
 	
 	dtime = ros::Time::now().toSec();
 	
@@ -105,7 +105,7 @@ void FaceTracker::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 		sensor_msgs::RegionOfInterest roi;
 		for (int i = 0; i < (int)faces.size(); i++)
 		{
-			if (faces[i].views > 0)
+			if (faces[i].views > 15)
 			{
 				roi.x_offset = faces[i].roi.x;
 				roi.y_offset = faces[i].roi.y;
@@ -226,7 +226,7 @@ std::vector<cv::Rect> FaceTracker::findFaces(cv::Mat frame)
 	equalizeHist(frame_gray, frame_gray);
 
 	//-- Detect faces
-	face_cascade.detectMultiScale(frame_gray, faces, 1.1, 6, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, Size(5, 5),Size(80, 80));
+	face_cascade.detectMultiScale(frame_gray, faces, 1.1, 6, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, Size(50, 50),Size(120, 120));
 	//~ face_cascade.detectMultiScale(frame_gray, faces, 1.4, 6, 0|CV_HAAR_SCALE_IMAGE, Size(25, 25));
 
 	for (int i = 0; i < (int)faces.size(); i++)
