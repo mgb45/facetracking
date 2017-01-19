@@ -6,7 +6,7 @@ using namespace std;
 face::face(cv::Rect roi_in, double dt)
 {
 	tracker.init(4,2,0,CV_32F);
-	tracker.transitionMatrix = *(Mat_<float> (4, 4) << 1, 0, dt, 0, 0, 1, 0, dt, 0, 0, 1, 0, 0, 0, 0, 1);
+	tracker.transitionMatrix = cv::Mat::eye(4,4,CV_32F);
 	tracker.statePre.at<float>(0) = roi_in.x;
 	tracker.statePre.at<float>(1) = roi_in.y;
 	tracker.statePre.at<float>(2) = 0;
@@ -71,7 +71,7 @@ FaceTracker::FaceTracker()
 		ROS_ERROR("--(!)Error loading\n");
 	}
 	
-	faceThresh = 2;
+	faceThresh = 8;
 	
 	dtime = ros::Time::now().toSec();
 	
@@ -226,7 +226,7 @@ std::vector<cv::Rect> FaceTracker::findFaces(cv::Mat frame)
 	equalizeHist(frame_gray, frame_gray);
 
 	//-- Detect faces
-	face_cascade.detectMultiScale(frame_gray, faces, 1.1, 6, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, Size(50, 50),Size(120, 120));
+	face_cascade.detectMultiScale(frame_gray, faces, 1.1, 3, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, Size(50, 50),Size(80, 80));
 	//~ face_cascade.detectMultiScale(frame_gray, faces, 1.4, 6, 0|CV_HAAR_SCALE_IMAGE, Size(25, 25));
 
 	for (int i = 0; i < (int)faces.size(); i++)
